@@ -19,11 +19,16 @@ export class TodosService {
   ) {}
 
   async create(createTodoDto: CreateTodoInput): Promise<Todo> {
-    const todo = await this.prisma.todo.create({
-      data: createTodoDto,
-    });
-    await this.pubSub.publish(TODOS_ADDED, { [TODOS_ADDED]: todo });
-    return todo;
+    try {
+      const todo = await this.prisma.todo.create({
+        data: createTodoDto,
+      });
+      await this.pubSub.publish(TODOS_ADDED, { [TODOS_ADDED]: todo });
+      return todo;
+    } catch (error) {
+      throw new Error(`Failed to create todo: ${error.message}`);
+    }
+  }
   }
 
   findAll(): Promise<Todo[]> {
