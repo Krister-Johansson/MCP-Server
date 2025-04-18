@@ -6,8 +6,9 @@ import {
   Param,
   Patch,
   Post,
+  HttpStatus,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateTodoInput } from './dto/create-todo.input';
 import { UpdateTodoInput } from './dto/update-todo.input';
 import { TodosService } from './todos.service';
@@ -19,8 +20,12 @@ export class TodosController {
   @Post()
   @ApiOperation({ summary: 'Create a new todo' })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.CREATED,
     description: 'The todo has been successfully created.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data or failed to create todo.',
   })
   @ApiBody({ type: CreateTodoInput })
   create(@Body() createTodoDto: CreateTodoInput) {
@@ -30,8 +35,12 @@ export class TodosController {
   @Get()
   @ApiOperation({ summary: 'Get all todos' })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'The todos have been successfully retrieved.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Failed to fetch todos.',
   })
   findAll() {
     return this.todosService.findAll();
@@ -39,9 +48,18 @@ export class TodosController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a todo by id' })
+  @ApiParam({ name: 'id', description: 'Todo ID' })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'The todo has been successfully retrieved.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Todo not found.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid todo ID or failed to fetch todo.',
   })
   findOne(@Param('id') id: string) {
     return this.todosService.findOne(id);
@@ -49,19 +67,38 @@ export class TodosController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a todo by id' })
+  @ApiParam({ name: 'id', description: 'Todo ID' })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'The todo has been successfully updated.',
   })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Todo not found.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data or failed to update todo.',
+  })
+  @ApiBody({ type: UpdateTodoInput })
   update(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoInput) {
     return this.todosService.update(id, updateTodoDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a todo by id' })
+  @ApiParam({ name: 'id', description: 'Todo ID' })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'The todo has been successfully deleted.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Todo not found.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid todo ID or failed to delete todo.',
   })
   remove(@Param('id') id: string) {
     return this.todosService.remove(id);

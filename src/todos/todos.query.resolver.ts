@@ -13,7 +13,7 @@ export class TodosQueryResolver {
   }
 
   @Query(() => Todo)
-  async todo(@Args('id') id: string): Promise<Todo | null> {
+  async todo(@Args('id') id: string): Promise<Todo> {
     return this.todosService.findOne(id);
   }
 }

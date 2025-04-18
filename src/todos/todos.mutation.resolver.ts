@@ -21,15 +21,11 @@ export class TodosMutationResolver {
     @Args('id') id: string,
     @Args('updateTodoInput') updateTodoInput: UpdateTodoInput,
   ): Promise<Todo> {
-    const todo = await this.todosService.findOne(id);
-    if (!todo) {
-      throw new Error(`Todo with ID ${id} not found`);
-    }
     return this.todosService.update(id, updateTodoInput);
   }
 
-  @Mutation(() => Todo)
-  async deleteTodo(@Args('id') id: string): Promise<Todo> {
+  @Mutation(() => Boolean)
+  async deleteTodo(@Args('id') id: string): Promise<boolean> {
     const todo = await this.todosService.findOne(id);
     if (!todo) {
       throw new Error(`Todo with ID ${id} not found`);
