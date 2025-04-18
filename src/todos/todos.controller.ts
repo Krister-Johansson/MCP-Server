@@ -1,16 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
-import { TodosService } from './todos.service';
-import { CreateTodoDto } from './dto/create-todo.dto';
-import { UpdateTodoDto } from './dto/update-todo.dto';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { CreateTodoInput } from './dto/create-todo.input';
+import { UpdateTodoInput } from './dto/update-todo.input';
+import { TodosService } from './todos.service';
 
 @Controller('todos')
 export class TodosController {
@@ -22,8 +22,8 @@ export class TodosController {
     status: 201,
     description: 'The todo has been successfully created.',
   })
-  @ApiBody({ type: CreateTodoDto })
-  create(@Body() createTodoDto: CreateTodoDto) {
+  @ApiBody({ type: CreateTodoInput })
+  create(@Body() createTodoDto: CreateTodoInput) {
     return this.todosService.create(createTodoDto);
   }
 
@@ -44,7 +44,7 @@ export class TodosController {
     description: 'The todo has been successfully retrieved.',
   })
   findOne(@Param('id') id: string) {
-    return this.todosService.findOne(+id);
+    return this.todosService.findOne(id);
   }
 
   @Patch(':id')
@@ -53,8 +53,8 @@ export class TodosController {
     status: 200,
     description: 'The todo has been successfully updated.',
   })
-  update(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoDto) {
-    return this.todosService.update(+id, updateTodoDto);
+  update(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoInput) {
+    return this.todosService.update(id, updateTodoDto);
   }
 
   @Delete(':id')
@@ -64,6 +64,6 @@ export class TodosController {
     description: 'The todo has been successfully deleted.',
   })
   remove(@Param('id') id: string) {
-    return this.todosService.remove(+id);
+    return this.todosService.remove(id);
   }
 }
