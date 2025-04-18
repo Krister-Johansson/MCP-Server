@@ -12,8 +12,8 @@ export class TodosQueryResolver {
     return this.todosService.findAll();
   }
 
-  @Query(() => Todo, { nullable: true })
-  async todo(@Args('id') id: string): Promise<Todo | null> {
+  @Query(() => Todo)
+  async todo(@Args('id') id: string): Promise<Todo> {
     return this.todosService.findOne(id);
   }
 }

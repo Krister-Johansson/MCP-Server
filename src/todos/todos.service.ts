@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { Todo } from '@prisma/client';
 import { PubSub } from 'graphql-subscriptions';
@@ -46,35 +46,28 @@ export class TodosService {
     return todos;
   }
 
-  async findOne(id: string): Promise<Todo | null> {
+  async findOne(id: string): Promise<Todo> {
     this.logger.log(`Fetching todo with ID: ${id}`);
 
-    const todo = await this.prisma.todo.findUniqueOrThrow({
+    const todo = await this.prisma.todo.findUnique({
       where: { id },
     });
 
     if (!todo) {
-      return null;
+      throw new NotFoundException(`Todo with ID ${id} not found`);
     }
 
     this.logger.debug(`Found todo with ID: ${id}`);
     return todo;
   }
 
-  async update(
-    id: string,
-    updateTodoDto: UpdateTodoInput,
-  ): Promise<Todo | null> {
+  async update(id: string, updateTodoDto: UpdateTodoInput): Promise<Todo> {
     this.logger.log(`Updating todo with ID: ${id}`);
 
     const todo = await this.findOne(id);
 
-    if (!todo) {
-      return null;
-    }
-
     const updatedTodo = await this.prisma.todo.update({
-      where: { id },
+      where: { id: todo.id },
       data: updateTodoDto,
     });
 
@@ -89,17 +82,13 @@ export class TodosService {
     return updatedTodo;
   }
 
-  async remove(id: string): Promise<Todo | null> {
+  async remove(id: string): Promise<boolean> {
     this.logger.log(`Deleting todo with ID: ${id}`);
 
     const todo = await this.findOne(id);
 
-    if (!todo) {
-      return null;
-    }
-
     const deletedTodo = await this.prisma.todo.delete({
-      where: { id },
+      where: { id: todo.id },
     });
 
     this.logger.log(`Successfully deleted todo with ID: ${id}`);
@@ -110,6 +99,6 @@ export class TodosService {
 
     this.logger.debug(`Published ${TODOS_DELETED} event for todo ID: ${id}`);
 
-    return deletedTodo;
+    return true;
   }
 }
