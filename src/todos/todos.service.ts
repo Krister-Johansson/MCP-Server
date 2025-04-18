@@ -25,9 +25,15 @@ export class TodosService {
   }
 
   update(id: string, updateTodoDto: UpdateTodoInput): Promise<Todo> {
-    return this.prisma.todo.update({
-      where: { id },
-      data: updateTodoDto,
+    // First check if the todo exists
+    return this.findOne(id).then((todo) => {
+      if (!todo) {
+        throw new Error(`Todo with ID ${id} not found`);
+      }
+      return this.prisma.todo.update({
+        where: { id },
+        data: updateTodoDto,
+      });
     });
   }
 
