@@ -27,6 +27,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.1.4",
     "@prisma/client": "^6.6.0",
     "@rekog/mcp-nest": "^1.5.0-beta.1",
     "class-transformer": "^0.5.1",

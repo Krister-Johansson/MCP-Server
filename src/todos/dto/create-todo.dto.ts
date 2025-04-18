@@ -10,6 +10,5 @@ export class CreateTodoDto {
   description: string;
 
   @IsBoolean()
-  @IsNotEmpty()
-  completed: boolean;
+  completed?: boolean;
 }
