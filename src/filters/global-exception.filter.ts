@@ -24,10 +24,10 @@ export class GlobalExceptionFilter
         return this.handleGqlException(exception, host);
       case 'http':
         this.handleHttpException(exception, host);
-        break;
+        return;
       default:
         this.logger.error(exception);
-        break;
+        return exception;
     }
   }
 
