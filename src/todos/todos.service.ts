@@ -1,17 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateTodoInput } from './dto/create-todo.input';
 import { UpdateTodoInput } from './dto/update-todo.input';
 import { Todo } from '@prisma/client';
+import { PubSub } from 'graphql-subscriptions';
+import {
+  TODOS_ADDED,
+  TODOS_UPDATED,
+  TODOS_DELETED,
+} from './todos.subscription.resolver';
 
 @Injectable()
 export class TodosService {
-  constructor(readonly prisma: PrismaService) {}
-  create(createTodoDto: CreateTodoInput): Promise<Todo> {
-    return this.prisma.todo.create({
-      data: createTodoDto,
-    });
+  constructor(
+    readonly prisma: PrismaService,
+    @Inject('PUB_SUB') private pubSub: PubSub,
+  ) {}
+
+  async create(createTodoDto: CreateTodoInput): Promise<Todo> {
+    try {
+      const todo = await this.prisma.todo.create({
+        data: createTodoDto,
+      });
+      await this.pubSub.publish(TODOS_ADDED, { [TODOS_ADDED]: todo });
+      return todo;
+    } catch (error) {
+      throw new Error(`Failed to create todo: ${error.message}`);
+    }
+  }
   }
 
   findAll(): Promise<Todo[]> {
@@ -24,22 +41,28 @@ export class TodosService {
     });
   }
 
-  update(id: string, updateTodoDto: UpdateTodoInput): Promise<Todo> {
-    // First check if the todo exists
-    return this.findOne(id).then((todo) => {
-      if (!todo) {
-        throw new Error(`Todo with ID ${id} not found`);
-      }
-      return this.prisma.todo.update({
-        where: { id },
-        data: updateTodoDto,
-      });
+  async update(id: string, updateTodoDto: UpdateTodoInput): Promise<Todo> {
+    const todo = await this.findOne(id);
+    if (!todo) {
+      throw new Error(`Todo with ID ${id} not found`);
+    }
+    const updatedTodo = await this.prisma.todo.update({
+      where: { id },
+      data: updateTodoDto,
     });
+    await this.pubSub.publish(TODOS_UPDATED, { [TODOS_UPDATED]: updatedTodo });
+    return updatedTodo;
   }
 
-  remove(id: string): Promise<Todo> {
-    return this.prisma.todo.delete({
+  async remove(id: string): Promise<Todo> {
+    const todo = await this.findOne(id);
+    if (!todo) {
+      throw new Error(`Todo with ID ${id} not found`);
+    }
+    const deletedTodo = await this.prisma.todo.delete({
       where: { id },
     });
+    await this.pubSub.publish(TODOS_DELETED, { [TODOS_DELETED]: deletedTodo });
+    return deletedTodo;
   }
 }

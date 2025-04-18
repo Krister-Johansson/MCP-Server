@@ -8,6 +8,8 @@ import { TodosModule } from './todos/todos.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { PubSubModule } from './pubsub/pubsub.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,6 +20,9 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       driver: ApolloDriver,
       playground: false,
       autoSchemaFile: true,
+      subscriptions: {
+        'graphql-ws': true,
+      },
       plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
     }),
     McpModule.forRoot({
@@ -28,9 +33,8 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
         pingIntervalMs: 30000,
       },
     }),
-
     PrismaModule,
-
+    PubSubModule,
     TodosModule,
   ],
   controllers: [],
