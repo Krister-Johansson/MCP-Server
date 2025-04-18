@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Todo" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
     "completed" BOOLEAN NOT NULL DEFAULT false,
