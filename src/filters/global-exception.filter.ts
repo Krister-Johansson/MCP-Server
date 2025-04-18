@@ -62,7 +62,8 @@ export class GlobalExceptionFilter
     const error = {
       path: request.url,
       method: request.method,
-      exception,
+      message: exception instanceof Error ? exception.message : 'An unexpected error occurred',
+      statusCode: status
     };
 
     response.status(status).send(error);
