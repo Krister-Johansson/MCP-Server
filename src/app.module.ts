@@ -62,7 +62,6 @@ import { GraphQLError } from 'graphql';
           message: originalError.message || error.message,
           error: originalError.error || 'Internal Server Error',
           statusCode: originalError.statusCode || 500,
-          code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
         };
       },
     }),

@@ -1,57 +1,35 @@
 import {
-  ArgumentsHost,
+  BadRequestException,
   Catch,
+  ConflictException,
   ExceptionFilter,
-  HttpStatus,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { Response } from 'express';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(PrismaExceptionFilter.name);
 
-  catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
-
+  catch(exception: Prisma.PrismaClientKnownRequestError) {
     switch (exception.code) {
       case 'P2002':
-        status = HttpStatus.CONFLICT;
-        message = `Unique constraint failed on ${((exception.meta?.target as string[]) || []).join(', ')}`;
-        break;
+        this.logger.error(exception.meta?.cause);
+        throw new ConflictException(exception.meta?.cause as string);
       case 'P2025':
-        status = HttpStatus.NOT_FOUND;
-        message = 'Record not found';
-        break;
+        this.logger.error(exception.meta?.cause);
+        throw new NotFoundException(exception.meta?.cause as string);
       case 'P2003':
-        status = HttpStatus.BAD_REQUEST;
-        message = 'Foreign key constraint failed';
-        break;
+        this.logger.error(exception.meta?.cause);
+        throw new BadRequestException(exception.meta?.cause as string);
       case 'P2004':
-        status = HttpStatus.BAD_REQUEST;
-        message = 'Constraint failed';
-        break;
+        this.logger.error(exception.meta?.cause);
+        throw new BadRequestException(exception.meta?.cause as string);
       default:
-        status = HttpStatus.INTERNAL_SERVER_ERROR;
-        message = 'Internal server error';
+        this.logger.error(exception.meta?.cause);
+        throw new InternalServerErrorException(exception.meta?.cause as string);
     }
-
-    if (status === HttpStatus.NOT_FOUND) {
-      throw new NotFoundException(message);
-    }
-
-    this.logger.error(exception);
-
-    response.status(status).json({
-      statusCode: status,
-      message,
-      timestamp: new Date().toISOString(),
-    });
   }
 }
