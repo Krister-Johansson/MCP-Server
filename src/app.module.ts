@@ -10,6 +10,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { PubSubModule } from './pubsub/pubsub.module';
 import { LoggerModule } from 'nestjs-pino';
+import { GraphQLError } from 'graphql';
 @Module({
   imports: [
     LoggerModule.forRoot(),
@@ -25,6 +26,15 @@ import { LoggerModule } from 'nestjs-pino';
         'graphql-ws': true,
       },
       plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+      formatError: (error: GraphQLError) => {
+        console.log(error);
+
+        return {
+          message: error.message,
+          code: error.extensions?.code,
+          statusCode: error.extensions?.statusCode,
+        };
+      },
     }),
     McpModule.forRoot({
       name: 'my-mcp-server',

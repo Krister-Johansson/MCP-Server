@@ -12,7 +12,7 @@ export class TodosQueryResolver {
     return this.todosService.findAll();
   }
 
-  @Query(() => Todo)
+  @Query(() => Todo, { nullable: true })
   async todo(@Args('id') id: string): Promise<Todo | null> {
     return this.todosService.findOne(id);
   }

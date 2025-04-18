@@ -4,6 +4,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from 'nestjs-pino';
+import { GraphQLExceptionFilter } from './filters/graphql-exception.filter';
+import { PrismaExceptionFilter } from './filters/prisma-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -12,7 +14,12 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') ?? 8000;
 
   app.useLogger(app.get(Logger));
+
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(
+    new GraphQLExceptionFilter(),
+    new PrismaExceptionFilter(),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Todo API')
