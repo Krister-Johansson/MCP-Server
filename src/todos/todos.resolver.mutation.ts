@@ -30,6 +30,10 @@ export class TodosMutationResolver {
 
   @Mutation(() => Todo)
   async deleteTodo(@Args('id') id: string): Promise<Todo> {
+    const todo = await this.todosService.findOne(id);
+    if (!todo) {
+      throw new Error(`Todo with ID ${id} not found`);
+    }
     return this.todosService.remove(id);
   }
 }
