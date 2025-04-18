@@ -29,7 +29,9 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory);
 
   app.setGlobalPrefix('/api', { exclude: ['sse', 'messages'] });
-  await app.listen(port);
+  await app.listen(port).then(() => {
+    console.log(`Server is running on port ${port}`);
+  });
 }
 
 bootstrap();

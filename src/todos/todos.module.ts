@@ -15,5 +15,6 @@ import { TodosSubscriptionResolver } from './todos.subscription.resolver';
     TodosMutationResolver,
     TodosSubscriptionResolver,
   ],
+  exports: [TodosService],
 })
 export class TodosModule {}
