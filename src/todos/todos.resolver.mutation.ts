@@ -21,6 +21,10 @@ export class TodosMutationResolver {
     @Args('id') id: string,
     @Args('updateTodoInput') updateTodoInput: UpdateTodoInput,
   ): Promise<Todo> {
+    const todo = await this.todosService.findOne(id);
+    if (!todo) {
+      throw new Error(`Todo with ID ${id} not found`);
+    }
     return this.todosService.update(id, updateTodoInput);
   }
 
