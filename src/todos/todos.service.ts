@@ -64,10 +64,8 @@ export class TodosService {
   async update(id: string, updateTodoDto: UpdateTodoInput): Promise<Todo> {
     this.logger.log(`Updating todo with ID: ${id}`);
 
-    const todo = await this.findOne(id);
-
     const updatedTodo = await this.prisma.todo.update({
-      where: { id: todo.id },
+      where: { id },
       data: updateTodoDto,
     });
 
@@ -85,10 +83,8 @@ export class TodosService {
   async remove(id: string): Promise<boolean> {
     this.logger.log(`Deleting todo with ID: ${id}`);
 
-    const todo = await this.findOne(id);
-
     const deletedTodo = await this.prisma.todo.delete({
-      where: { id: todo.id },
+      where: { id },
     });
 
     this.logger.log(`Successfully deleted todo with ID: ${id}`);
