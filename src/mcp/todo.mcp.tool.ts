@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Resource, Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { TodosService } from '../todos/todos.service';
-import { Priority } from 'src/todos/enums/priority.enum';
+import { Priority } from '../todos/enums/priority.enum';
 
 // Define the create todo parameter schema
 const createTodoSchema = z.object({
