@@ -7,6 +7,7 @@ import {
   IsString,
   IsUUID,
   IsArray,
+  ValidateIf,
 } from 'class-validator';
 
 import { Type } from 'class-transformer';
@@ -39,6 +40,7 @@ export class CreateTodoInput {
   @IsOptional()
   @IsDate()
   @Type(() => Date)
+  @ValidateIf((o: CreateTodoInput) => o.dueDate != null)
   @Field(() => Date, { nullable: true })
   startDate?: Date;
 
@@ -46,6 +48,15 @@ export class CreateTodoInput {
   @IsOptional()
   @IsDate()
   @Type(() => Date)
+  @ValidateIf(
+    (o: CreateTodoInput) => {
+      if (o.startDate && o.dueDate) {
+        return o.startDate <= o.dueDate;
+      }
+      return true;
+    },
+    { message: 'Due date must be after start date' },
+  )
   @Field(() => Date, { nullable: true })
   dueDate?: Date;
 

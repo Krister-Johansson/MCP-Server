@@ -6,85 +6,111 @@ import { TodosService } from '../todos/todos.service';
 import { Priority } from '../todos/enums/priority.enum';
 
 // Define the create todo parameter schema
-const createTodoSchema = z.object({
-  title: z.string().min(1).max(100).describe('The title of the todo item'),
-  description: z
-    .string()
-    .max(500)
-    .optional()
-    .describe('Optional detailed description of the todo'),
-  completed: z
-    .boolean()
-    .default(false)
-    .describe('Whether the todo is completed or not'),
-  priority: z
-    .nativeEnum(Priority)
-    .default(Priority.MEDIUM)
-    .describe('Priority level of the todo'),
-  startDate: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((str) => (str ? new Date(str) : undefined))
-    .describe('Optional start date for the todo'),
-  dueDate: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((str) => (str ? new Date(str) : undefined))
-    .describe('Optional due date for the todo'),
-  userId: z.string().uuid().describe('The ID of the user who owns this todo'),
-  tagIds: z
-    .array(z.string().uuid())
-    .optional()
-    .describe('Optional array of tag IDs to associate with the todo'),
-});
+const createTodoSchema = z
+  .object({
+    title: z.string().min(1).max(100).describe('The title of the todo item'),
+    description: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Optional detailed description of the todo'),
+    completed: z
+      .boolean()
+      .default(false)
+      .describe('Whether the todo is completed or not'),
+    priority: z
+      .nativeEnum(Priority)
+      .default(Priority.MEDIUM)
+      .describe('Priority level of the todo'),
+    startDate: z
+      .string()
+      .datetime()
+      .optional()
+      .transform((str) => (str ? new Date(str) : undefined))
+      .describe('Optional start date for the todo'),
+    dueDate: z
+      .string()
+      .datetime()
+      .optional()
+      .transform((str) => (str ? new Date(str) : undefined))
+      .describe('Optional due date for the todo'),
+    userId: z.string().uuid().describe('The ID of the user who owns this todo'),
+    tagIds: z
+      .array(z.string().uuid())
+      .optional()
+      .describe('Optional array of tag IDs to associate with the todo'),
+  })
+  .refine(
+    (data) => {
+      if (data.startDate && data.dueDate) {
+        return data.startDate <= data.dueDate;
+      }
+      return true;
+    },
+    {
+      message: 'Start date cannot be after due date',
+      path: ['startDate'], // Highlights the startDate field as the source of the error
+    },
+  );
 
 // Infer the type from the schema
 type CreateTodoParams = z.infer<typeof createTodoSchema>;
 
 // Define the update todo parameter schema
-const updateTodoSchema = z.object({
-  id: z
-    .string()
-    .uuid()
-    .describe('The unique identifier of the todo item to update'),
-  title: z
-    .string()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('New title for the todo'),
-  description: z
-    .string()
-    .max(500)
-    .optional()
-    .describe('New description for the todo'),
-  completed: z
-    .boolean()
-    .optional()
-    .describe('New completion status for the todo'),
-  priority: z
-    .nativeEnum(Priority)
-    .optional()
-    .describe('New priority level for the todo'),
-  startDate: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((str) => (str ? new Date(str) : undefined))
-    .describe('New start date for the todo'),
-  dueDate: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((str) => (str ? new Date(str) : undefined))
-    .describe('New due date for the todo'),
-  tagIds: z
-    .array(z.string().uuid())
-    .optional()
-    .describe('New array of tag IDs to associate with the todo'),
-});
+const updateTodoSchema = z
+  .object({
+    id: z
+      .string()
+      .uuid()
+      .describe('The unique identifier of the todo item to update'),
+    title: z
+      .string()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('New title for the todo'),
+    description: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('New description for the todo'),
+    completed: z
+      .boolean()
+      .optional()
+      .describe('New completion status for the todo'),
+    priority: z
+      .nativeEnum(Priority)
+      .optional()
+      .describe('New priority level for the todo'),
+    startDate: z
+      .string()
+      .datetime()
+      .optional()
+      .transform((str) => (str ? new Date(str) : undefined))
+      .describe('New start date for the todo'),
+    dueDate: z
+      .string()
+      .datetime()
+      .optional()
+      .transform((str) => (str ? new Date(str) : undefined))
+      .describe('New due date for the todo'),
+    tagIds: z
+      .array(z.string().uuid())
+      .optional()
+      .describe('New array of tag IDs to associate with the todo'),
+  })
+  .refine(
+    (data) => {
+      if (data.startDate && data.dueDate) {
+        return data.startDate <= data.dueDate;
+      }
+      return true;
+    },
+    {
+      message: 'Start date cannot be after due date',
+      path: ['startDate'], // Highlights the startDate field as the source of the error
+    },
+  );
 
 // Infer the type from the schema
 type UpdateTodoParams = z.infer<typeof updateTodoSchema>;
