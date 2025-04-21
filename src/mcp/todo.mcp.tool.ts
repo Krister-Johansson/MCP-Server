@@ -1,7 +1,93 @@
 import { Injectable, Logger } from '@nestjs/common';
+
 import { Resource, Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { TodosService } from '../todos/todos.service';
+import { Priority } from 'src/todos/enums/priority.enum';
+
+// Define the create todo parameter schema
+const createTodoSchema = z.object({
+  title: z.string().min(1).max(100).describe('The title of the todo item'),
+  description: z
+    .string()
+    .max(500)
+    .optional()
+    .describe('Optional detailed description of the todo'),
+  completed: z
+    .boolean()
+    .default(false)
+    .describe('Whether the todo is completed or not'),
+  priority: z
+    .nativeEnum(Priority)
+    .default(Priority.MEDIUM)
+    .describe('Priority level of the todo'),
+  startDate: z
+    .string()
+    .datetime()
+    .optional()
+    .transform((str) => (str ? new Date(str) : undefined))
+    .describe('Optional start date for the todo'),
+  dueDate: z
+    .string()
+    .datetime()
+    .optional()
+    .transform((str) => (str ? new Date(str) : undefined))
+    .describe('Optional due date for the todo'),
+  userId: z.string().uuid().describe('The ID of the user who owns this todo'),
+  tagIds: z
+    .array(z.string().uuid())
+    .optional()
+    .describe('Optional array of tag IDs to associate with the todo'),
+});
+
+// Infer the type from the schema
+type CreateTodoParams = z.infer<typeof createTodoSchema>;
+
+// Define the update todo parameter schema
+const updateTodoSchema = z.object({
+  id: z
+    .string()
+    .uuid()
+    .describe('The unique identifier of the todo item to update'),
+  title: z
+    .string()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe('New title for the todo'),
+  description: z
+    .string()
+    .max(500)
+    .optional()
+    .describe('New description for the todo'),
+  completed: z
+    .boolean()
+    .optional()
+    .describe('New completion status for the todo'),
+  priority: z
+    .nativeEnum(Priority)
+    .optional()
+    .describe('New priority level for the todo'),
+  startDate: z
+    .string()
+    .datetime()
+    .optional()
+    .transform((str) => (str ? new Date(str) : undefined))
+    .describe('New start date for the todo'),
+  dueDate: z
+    .string()
+    .datetime()
+    .optional()
+    .transform((str) => (str ? new Date(str) : undefined))
+    .describe('New due date for the todo'),
+  tagIds: z
+    .array(z.string().uuid())
+    .optional()
+    .describe('New array of tag IDs to associate with the todo'),
+});
+
+// Infer the type from the schema
+type UpdateTodoParams = z.infer<typeof updateTodoSchema>;
 
 @Injectable()
 export class TodoMcpTool {
@@ -10,39 +96,25 @@ export class TodoMcpTool {
 
   @Tool({
     name: 'create-todo',
-    description: `Creates a new todo item with the given title, optional description, and completion status.
+    description: `Creates a new todo item with all available fields.
     Example usage:
-    - Create a simple todo: {"title": "Buy groceries"}
-    - Create a detailed todo: {"title": "Write report", "description": "Complete the quarterly report", "completed": false}`,
-    parameters: z.object({
-      title: z.string().min(1).max(100).describe('The title of the todo item'),
-      description: z
-        .string()
-        .max(500)
-        .optional()
-        .describe('Optional detailed description of the todo'),
-      completed: z
-        .boolean()
-        .default(false)
-        .describe('Whether the todo is completed or not'),
-    }),
+    - Create a simple todo: {"title": "Buy groceries", "userId": "123e4567-e89b-12d3-a456-426614174000"}
+    - Create a detailed todo: {
+      "title": "Write report",
+      "description": "Complete the quarterly report",
+      "completed": false,
+      "priority": "HIGH",
+      "startDate": "2024-03-20T09:00:00Z",
+      "dueDate": "2024-03-25T17:00:00Z",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "tagIds": ["tag-uuid-1", "tag-uuid-2"]
+    }`,
+    parameters: createTodoSchema,
   })
-  async createTodo({
-    title,
-    description,
-    completed,
-  }: {
-    title: string;
-    description?: string;
-    completed: boolean;
-  }) {
-    this.logger.log(`Creating new todo: ${title}`);
+  async createTodo(params: CreateTodoParams) {
+    this.logger.log(`Creating new todo: ${params.title}`);
     try {
-      const todo = await this.todosService.create({
-        title,
-        description,
-        completed,
-      });
+      const todo = await this.todosService.create(params);
 
       this.logger.log(`Successfully created todo with ID: ${todo.id}`);
       return {
@@ -134,30 +206,19 @@ export class TodoMcpTool {
     Example usage:
     - Update title: {"id": "123", "title": "Updated title"}
     - Mark as completed: {"id": "123", "completed": true}
-    - Update multiple fields: {"id": "123", "title": "New title", "description": "New description", "completed": true}`,
-    parameters: z.object({
-      id: z
-        .string()
-        .uuid()
-        .describe('The unique identifier of the todo item to update'),
-      title: z
-        .string()
-        .min(1)
-        .max(100)
-        .optional()
-        .describe('New title for the todo'),
-      description: z
-        .string()
-        .max(500)
-        .optional()
-        .describe('New description for the todo'),
-      completed: z
-        .boolean()
-        .optional()
-        .describe('New completion status for the todo'),
-    }),
+    - Update multiple fields: {
+      "id": "123",
+      "title": "New title",
+      "description": "New description",
+      "completed": true,
+      "priority": "HIGH",
+      "startDate": "2024-03-20T09:00:00Z",
+      "dueDate": "2024-03-25T17:00:00Z",
+      "tagIds": ["tag-uuid-1", "tag-uuid-2"]
+    }`,
+    parameters: updateTodoSchema,
   })
-  async updateTodo({ id, ...updateData }: { id: string; [key: string]: any }) {
+  async updateTodo({ id, ...updateData }: UpdateTodoParams) {
     this.logger.log(
       `Updating todo ${id} with data: ${JSON.stringify(updateData)}`,
     );

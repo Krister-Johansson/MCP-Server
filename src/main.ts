@@ -8,7 +8,10 @@ import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { PrismaExceptionFilter } from './filters/prisma-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    cors: true,
+  });
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 8000;
