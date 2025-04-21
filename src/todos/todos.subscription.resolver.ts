@@ -13,6 +13,7 @@ export class TodosSubscriptionResolver {
 
   @Subscription(() => Todo, {
     name: TODOS_ADDED,
+    description: 'A new todo was added',
   })
   todoAdded() {
     return this.pubSub.asyncIterableIterator(TODOS_ADDED);
@@ -20,6 +21,7 @@ export class TodosSubscriptionResolver {
 
   @Subscription(() => Todo, {
     name: TODOS_UPDATED,
+    description: 'A todo was updated',
   })
   todoUpdated() {
     return this.pubSub.asyncIterableIterator(TODOS_UPDATED);
@@ -27,6 +29,7 @@ export class TodosSubscriptionResolver {
 
   @Subscription(() => Todo, {
     name: TODOS_DELETED,
+    description: 'A todo was deleted',
   })
   todoDeleted() {
     return this.pubSub.asyncIterableIterator(TODOS_DELETED);

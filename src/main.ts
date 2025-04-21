@@ -8,7 +8,10 @@ import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { PrismaExceptionFilter } from './filters/prisma-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    cors: true,
+  });
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 8000;
@@ -29,7 +32,9 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory);
 
   app.setGlobalPrefix('/api', { exclude: ['sse', 'messages'] });
-  await app.listen(port);
+  await app.listen(port).then(() => {
+    console.log(`Server is running on port ${port}`);
+  });
 }
 
 bootstrap();
